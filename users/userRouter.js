@@ -1,6 +1,8 @@
 const express = require('express');
-
+const User = require("./userDb.js");
 const router = express.Router();
+
+// Following only work for http://localhost:4000/api/user
 
 router.post('/', (req, res) => {
   // do your magic!
