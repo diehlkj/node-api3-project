@@ -4,80 +4,78 @@ const router = express.Router();
 
 // Following only work for http://localhost:4000/api/user
 
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
+  const { name } = req.body;
   User
-    .()
-      .then(  => {
-        res.status(201).json({});
+    .insert(name)
+      .then(userData => {
+        res.status(201).json({ userData });
       })
       .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
+        res.status(500).json({ message: 'exception', err });
       });
 });
 
-router.post('/:id/posts', (req, res) => {
-  User
-    .()
-      .then(  => {
-        res.status(201).json({});
-      })
-      .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
-      });
-});
+// router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
+//   const { text } = req.body;
+//   const userId = req.params.id;
+//   User
+//     .???????()
+//       .then( p => {
+//         res.status(201).json({});
+//       })
+//       .catch(err => {
+//         res.status(500).json({ message: 'exception', err });
+//       });
+// });
 
 router.get('/', (req, res) => {
   User
-    .()
-      .then(  => {
-        res.status(201).json({});
+    .get()
+      .then(userInfo => {
+        res.status(201).json({ userInfo });
       })
       .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
+        res.status(500).json({ message: 'exception', err });
       });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateUserId, (req, res) => {
+  res.status(201).json(req.user);
+});
+
+router.get('/:id/posts', validateUserId, (req, res) => {
   User
-    .()
-      .then(  => {
-        res.status(201).json({});
+    .getUserPosts(req.user.id)
+      .then(posts => {
+        res.status(201).json({ posts });
       })
       .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
+        res.status(500).json({ message: 'exception', err });
       });
 });
 
-router.get('/:id/posts', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   User
-    .()
-      .then(  => {
-        res.status(201).json({});
+    .remove(req.user.id)
+      .then(userData => {
+        res.status(201).json({ userData });
       })
       .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
+        res.status(500).json({ message: 'exception', err });
       });
 });
 
-router.delete('/:id', (req, res) => {
+router.put('/:id', validateUserId, validateUser, (req, res) => {
+  const { id } = req.user;
+  const { name } = req.body;
   User
-    .()
-      .then(  => {
-        res.status(201).json({});
+    .update(id, name)
+      .then(userData => {
+        res.status(201).json({ id, name });
       })
       .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
-      });
-});
-
-router.put('/:id', (req, res) => {
-  User
-    .()
-      .then(  => {
-        res.status(201).json({});
-      })
-      .catch(err => {
-        res.status(500).json({ errorMessage: "", err});
+        res.status(500).json({ message: 'exception', err });
       });
 });
 
@@ -87,9 +85,9 @@ function validateUserId(req, res, next) {
   const { id } = req.params;
   User
     .getById(id)
-    .then(data => {
-      if (data) {
-        req.user = data;
+    .then(userInfo => {
+      if (userInfo) {
+        req.user = userInfo;
         next();
       } else {
         res.status(400).json({ message: "invalid user id" });
